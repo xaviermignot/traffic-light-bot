@@ -1,5 +1,18 @@
 "use strict";
 const api = require("./trafficLightApi");
+function getMessageFromState(state) {
+    switch (state) {
+        case api.TrafficLightState.Off:
+            return 'Le feu est éteint';
+        case api.TrafficLightState.Green:
+            return 'Le feu est vert';
+        case api.TrafficLightState.Orange:
+            return 'Le feu est orange';
+        case api.TrafficLightState.Red:
+            return 'Le feu est rouge';
+    }
+}
+exports.getMessageFromState = getMessageFromState;
 function getMessageFromModel(model) {
     if (!model || !model.lightsOn) {
         return 'Je n\'arrive pas à voir le feu :\'(';

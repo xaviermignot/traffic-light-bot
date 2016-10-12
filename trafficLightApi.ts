@@ -13,6 +13,13 @@ export enum LightColor {
     Red
 };
 
+export enum TrafficLightState {
+    Off,
+    Green,
+    Orange,
+    Red
+};
+
 export interface TrafficLight {
     greenLightState: LightState;
     amberLightState: LightState;
@@ -20,35 +27,47 @@ export interface TrafficLight {
     lightsOn: Array<LightColor>;
 }
 
-export function get(): Promise<TrafficLight> {
-    return new Promise<TrafficLight>((resolve, reject) =>
+export function get(): Promise<TrafficLightState> {
+    return new Promise<TrafficLightState>((resolve, reject) => 
         needle.get(`${apiBaseUrl}/trafficlight`,
             (error, response) => {
                 if (!error && response.statusCode == 200) {
-                    var model = response.body;
-                    setLightsOn(model);
-                    resolve(model);
+                    var body : string = response.body;
+                    var state : TrafficLightState = TrafficLightState[body];
+                    resolve(state);
                 }
-            }));
+            }))
 }
 
-function setLightsOn(trafficLight: TrafficLight): void {
-    if (!trafficLight) {
-        return;
-    }
+// export function get(): Promise<TrafficLight> {
+//     return new Promise<TrafficLight>((resolve, reject) =>
+//         needle.get(`${apiBaseUrl}/trafficlight`,
+//             (error, response) => {
+//                 if (!error && response.statusCode == 200) {
+//                     var model = response.body;
+//                     setLightsOn(model);
+//                     resolve(model);
+//                 }
+//             }));
+// }
 
-    trafficLight.lightsOn = new Array<LightColor>();
+// function setLightsOn(trafficLight: TrafficLight): void {
+//     if (!trafficLight) {
+//         return;
+//     }
 
-    var stateOn = LightState[LightState.On];
-    if (trafficLight.greenLightState.toString() == stateOn) {
-        trafficLight.lightsOn.push(LightColor.Green);
-    }
+//     trafficLight.lightsOn = new Array<LightColor>();
 
-    if (trafficLight.amberLightState.toString() == stateOn) {
-        trafficLight.lightsOn.push(LightColor.Amber);
-    }
+//     var stateOn = LightState[LightState.On];
+//     if (trafficLight.greenLightState.toString() == stateOn) {
+//         trafficLight.lightsOn.push(LightColor.Green);
+//     }
 
-    if (trafficLight.redLightState.toString() == stateOn) {
-        trafficLight.lightsOn.push(LightColor.Red);
-    }
+//     if (trafficLight.amberLightState.toString() == stateOn) {
+//         trafficLight.lightsOn.push(LightColor.Amber);
+//     }
+
+//     if (trafficLight.redLightState.toString() == stateOn) {
+//         trafficLight.lightsOn.push(LightColor.Red);
+//     }
 }

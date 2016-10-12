@@ -13,29 +13,21 @@ var LightState = exports.LightState;
 })(exports.LightColor || (exports.LightColor = {}));
 var LightColor = exports.LightColor;
 ;
+(function (TrafficLightState) {
+    TrafficLightState[TrafficLightState["Off"] = 0] = "Off";
+    TrafficLightState[TrafficLightState["Green"] = 1] = "Green";
+    TrafficLightState[TrafficLightState["Orange"] = 2] = "Orange";
+    TrafficLightState[TrafficLightState["Red"] = 3] = "Red";
+})(exports.TrafficLightState || (exports.TrafficLightState = {}));
+var TrafficLightState = exports.TrafficLightState;
+;
 function get() {
     return new Promise((resolve, reject) => needle.get(`${apiBaseUrl}/trafficlight`, (error, response) => {
         if (!error && response.statusCode == 200) {
-            var model = response.body;
-            setLightsOn(model);
-            resolve(model);
+            var body = response.body;
+            var state = TrafficLightState[body];
+            resolve(state);
         }
     }));
 }
 exports.get = get;
-function setLightsOn(trafficLight) {
-    if (!trafficLight) {
-        return;
-    }
-    trafficLight.lightsOn = new Array();
-    var stateOn = LightState[LightState.On];
-    if (trafficLight.greenLightState.toString() == stateOn) {
-        trafficLight.lightsOn.push(LightColor.Green);
-    }
-    if (trafficLight.amberLightState.toString() == stateOn) {
-        trafficLight.lightsOn.push(LightColor.Amber);
-    }
-    if (trafficLight.redLightState.toString() == stateOn) {
-        trafficLight.lightsOn.push(LightColor.Red);
-    }
-}

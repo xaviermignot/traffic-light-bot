@@ -1,5 +1,18 @@
 import * as api from "./trafficLightApi";
 
+export function getMessageFromState(state: api.TrafficLightState): string {
+    switch (state) {
+        case api.TrafficLightState.Off:
+            return 'Le feu est éteint';
+        case api.TrafficLightState.Green:
+            return 'Le feu est vert';
+        case api.TrafficLightState.Orange:
+            return 'Le feu est orange';
+        case api.TrafficLightState.Red:
+            return 'Le feu est rouge';
+    }
+}
+
 export function getMessageFromModel(model: api.TrafficLight): string {
     if (!model || !model.lightsOn) {
         return 'Je n\'arrive pas à voir le feu :\'(';

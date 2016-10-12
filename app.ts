@@ -39,8 +39,8 @@ bot.dialog('/', [
     function (session, results) {
         session.send(`Bonjour ${session.userData.name} !`);
 
-        api.get().then((model) => {
-            session.send(msgHelper.getMessageFromModel(model));
+        api.get().then((state) => {
+            session.send(msgHelper.getMessageFromState(state));
         })
         .catch(() => {
             session.send('Mince, je n\'arrive pas à joindre le feu :\'(');
