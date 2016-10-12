@@ -1,6 +1,6 @@
 import needle = require('needle');
 
-const apiBaseUrl = 'http://localhost:5000/api';
+const apiBaseUrl = process.env.API_URL;
 
 export enum LightState {
     On,
