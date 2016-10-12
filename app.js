@@ -65,7 +65,7 @@ intents.matches('SwitchOnBulb', [
             builder.Prompts.text(session, 'Quel feu je dois allumer ?');
         }
         else {
-            // session.send(`Okay, j'allume le feu ${color.entity}`);
+            session.send(`Okay, j'allume le feu ${color.entity}`);
             api.set(msgHelper.getStateFromIntentColor(color.entity)).then((state) => session.send(`C'est bon, le feu ${color.entity} est allumé`))
                 .catch(() => session.send(`Damned, je n'ai pas réussi à allumer le feu ${color.entity}`));
         }
