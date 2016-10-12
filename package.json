@@ -4,8 +4,7 @@
   "description": "A bot able to control a traffic light",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "node_modules\\typescript\\bin\\tsc -p ."
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
