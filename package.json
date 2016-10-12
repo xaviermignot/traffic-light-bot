@@ -1,0 +1,16 @@
+{
+  "name": "trafficlight-bot",
+  "version": "1.0.0",
+  "description": "A bot able to control a traffic light",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Xavier Mignot",
+  "license": "ISC",
+  "dependencies": {
+    "botbuilder": "^3.2.3",
+    "needle": "^1.1.2",
+    "restify": "^4.1.1"
+  }
+}
