@@ -1,3 +1,4 @@
+import { LightColor } from './trafficLightApi';
 import * as api from "./trafficLightApi";
 
 export function getMessageFromState(state: api.TrafficLightState): string {
@@ -10,6 +11,19 @@ export function getMessageFromState(state: api.TrafficLightState): string {
             return 'Le feu est orange';
         case api.TrafficLightState.Red:
             return 'Le feu est rouge';
+    }
+}
+
+export function getStateFromIntentColor(color: string): api.TrafficLightState {
+    switch (color) {
+        case 'rouge':
+            return api.TrafficLightState.Red;
+        case 'orange':
+            return api.TrafficLightState.Orange;
+        case 'vert':
+            return api.TrafficLightState.Green;
+        default:
+            return api.TrafficLightState.Off;
     }
 }
 

@@ -44,3 +44,5 @@ typings
 
 # Os X stuff
 .DS_Store
+
+.env

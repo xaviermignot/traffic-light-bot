@@ -13,6 +13,19 @@ function getMessageFromState(state) {
     }
 }
 exports.getMessageFromState = getMessageFromState;
+function getStateFromIntentColor(color) {
+    switch (color) {
+        case 'rouge':
+            return api.TrafficLightState.Red;
+        case 'orange':
+            return api.TrafficLightState.Orange;
+        case 'vert':
+            return api.TrafficLightState.Green;
+        default:
+            return api.TrafficLightState.Off;
+    }
+}
+exports.getStateFromIntentColor = getStateFromIntentColor;
 function getMessageFromModel(model) {
     if (!model || !model.lightsOn) {
         return 'Je n\'arrive pas à voir le feu :\'(';
