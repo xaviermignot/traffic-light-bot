@@ -24,7 +24,7 @@ server.post('/api/messages', connector.listen());
 // Bots Dialogs
 //=========================================================
 // Create bot and add dialogs
-bot.dialog('/', [
+bot.dialog('/welcome', [
     function (session, args, next) {
         if (!session.userData.name) {
             session.beginDialog('/profile');
@@ -35,15 +35,7 @@ bot.dialog('/', [
     },
     function (session, results) {
         builder.Prompts.text(session, `Bonjour ${session.userData.name}, que puis-je faire pour vous ?`);
-        // api.get().then((state) => {
-        //     session.send(msgHelper.getMessageFromState(state));
-        // })
-        // .catch(() => {
-        //     session.send('Mince, je n\'arrive pas à joindre le feu :\'(');
-        // });
-    },
-    function (session, results) {
-        session.beginDialog('/actions', results.response);
+        session.endDialog();
     }
 ]);
 bot.dialog('/profile', [
@@ -57,17 +49,26 @@ bot.dialog('/profile', [
 ]);
 var recognizer = new builder.LuisRecognizer(process.env.LUIS_URL);
 var intents = new builder.IntentDialog({ recognizers: [recognizer] });
-bot.dialog('/actions', intents);
+intents.onBegin((session, args, next) => {
+    session.beginDialog('/welcome');
+});
+bot.dialog('/', intents);
 intents.matches('SwitchOnBulb', [
-    function (session, args) {
+        (session, args) => {
         var color = builder.EntityRecognizer.findEntity(args.entities, 'color');
         if (!color) {
             builder.Prompts.text(session, 'Quel feu je dois allumer ?');
         }
         else {
             session.send(`Okay, j'allume le feu ${color.entity}`);
-            api.set(msgHelper.getStateFromIntentColor(color.entity)).then((state) => session.send(`C'est bon, le feu ${color.entity} est allumé`))
-                .catch(() => session.send(`Damned, je n'ai pas réussi à allumer le feu ${color.entity}`));
+            session.sendTyping();
+            api.set(msgHelper.getStateFromIntentColor(color.entity)).then((state) => {
+                session.send(`C'est bon, le feu ${color.entity} est allumé`);
+            })
+                .catch(() => {
+                session.send(`Damned, je n'ai pas réussi à allumer le feu`);
+            })
+                .then(() => session.endDialog());
         }
     }
 ]);
