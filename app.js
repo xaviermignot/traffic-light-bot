@@ -24,46 +24,30 @@ server.post('/api/messages', connector.listen());
 // Bots Dialogs
 //=========================================================
 // Create bot and add dialogs
-bot.dialog('/welcome', [
-    function (session, args, next) {
-        if (!session.userData.name) {
-            session.beginDialog('/profile');
-        }
-        else {
-            next();
-        }
-    },
-    function (session, results) {
-        builder.Prompts.text(session, `Bonjour ${session.userData.name}, que puis-je faire pour vous ?`);
-        session.endDialog();
-    }
-]);
-bot.dialog('/profile', [
-    function (session) {
-        builder.Prompts.text(session, 'Bonjour ! Quel est votre nom ?');
-    },
-    function (session, results) {
-        session.userData.name = results.response;
-        session.endDialog();
-    }
-]);
 var recognizer = new builder.LuisRecognizer(process.env.LUIS_URL);
 var intents = new builder.IntentDialog({ recognizers: [recognizer] });
-intents.onBegin((session, args, next) => {
-    session.beginDialog('/welcome');
-});
 bot.dialog('/', intents);
-intents.matches('SwitchOnBulb', [
-        (session, args) => {
-        var color = builder.EntityRecognizer.findEntity(args.entities, 'color');
-        if (!color) {
-            builder.Prompts.text(session, 'Quel feu je dois allumer ?');
+intents.matches('SwitchOnBulb', '/switchOn')
+    .matches('SwitchOffBulb', '/switchOff')
+    .matches('GetLightsState', '/getState')
+    .onDefault(builder.DialogAction.send('Désolé, je n\'ai pas compris la question :-/'));
+bot.dialog('/switchOn', [
+        (session, args, next) => {
+        var colorEntity = builder.EntityRecognizer.findEntity(args.entities, 'color');
+        if (!colorEntity) {
+            builder.Prompts.choice(session, 'Quel feu je dois allumer ?', ['rouge', 'orange', 'vert'], { retryPrompt: 'Pardon, vous avez dit quel feu ?' });
         }
         else {
-            session.send(`Okay, j'allume le feu ${color.entity}`);
+            next({ response: colorEntity, resumed: null });
+        }
+    },
+        (session, result) => {
+        var color = result.response.entity;
+        if (color) {
+            session.send(`Okay, j'allume le feu ${color}`);
             session.sendTyping();
-            api.set(msgHelper.getStateFromIntentColor(color.entity)).then((state) => {
-                session.send(`C'est bon, le feu ${color.entity} est allumé`);
+            api.set(msgHelper.getStateFromIntentColor(color)).then((state) => {
+                session.send(`C'est bon, le feu ${color} est allumé`);
             })
                 .catch(() => {
                 session.send(`Damned, je n'ai pas réussi à allumer le feu`);
@@ -72,18 +56,12 @@ intents.matches('SwitchOnBulb', [
         }
     }
 ]);
-intents.matches('GetLightsState', [
-        (session, args) => {
-        api.get().then((state) => {
-            session.send(msgHelper.getMessageFromState(state));
-        })
-            .catch(() => {
-            session.send('Mince, je n\'arrive pas à joindre le feu :\'(');
-        });
-    }
-]);
-intents.matches('None', [
-        (session, args) => {
-        session.send('Désolé, je n\'ai pas compris la question :-/');
-    }
-]);
+bot.dialog('/getState', (session, args) => {
+    api.get().then((state) => {
+        session.send(msgHelper.getMessageFromState(state));
+    })
+        .catch(() => {
+        session.send('Mince, je n\'arrive pas à joindre le feu :\'(');
+    })
+        .then(() => session.endDialog());
+});
