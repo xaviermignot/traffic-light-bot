@@ -28,3 +28,7 @@ function set(state) {
     }));
 }
 exports.set = set;
+function switchOff() {
+    return new Promise((resolve, reject) => needle.delete(`${apiBaseUrl}/trafficlight`, null, (error, response) => resolve(!error && response.statusCode == 200)));
+}
+exports.switchOff = switchOff;

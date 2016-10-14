@@ -6,6 +6,7 @@ import dotenv = require('dotenv');
 import * as api from "./trafficLightApi";
 import * as msgHelper from "./messageHelper";
 
+// Use the .env file for managing environment variable for local development
 dotenv.config();
 
 //=========================================================
@@ -37,11 +38,13 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 
 bot.dialog('/', intents);
 
+// Makes the connexion between the LUIS intents and the bot dialogs
 intents.matches('SwitchOnBulb', '/switchOn')
     .matches('SwitchOffBulb', '/switchOff')
     .matches('GetLightsState', '/getState')
-    .onDefault(builder.DialogAction.send('Désolé, je n\'ai pas compris la question :-/'));
+    .onDefault('/fuckit');
 
+// Dialog used for switching a light on
 bot.dialog('/switchOn', [
     (session, args, next) => {
         var colorEntity = builder.EntityRecognizer.findEntity(args.entities, 'color');
@@ -70,6 +73,23 @@ bot.dialog('/switchOn', [
     }
 ]);
 
+// Dialog used to switch the lights off
+bot.dialog('/switchOff',
+    (session, args) => {
+        session.send('Okay, j\'éteins le feu');
+        session.sendTyping();
+        api.switchOff().then((result) => {
+            if (result) {
+                session.send('C\'est fait');
+            }
+            else {
+                session.send('Oups je trouve pas le bouton :-/');
+            }
+        })
+            .then(() => session.endDialog());
+    });
+
+// Dialog used to tell the user which light is on (if there is one)
 bot.dialog('/getState',
     (session, args) => {
         api.get().then((state) => {
@@ -79,4 +99,16 @@ bot.dialog('/getState',
                 session.send('Mince, je n\'arrive pas à joindre le feu :\'(');
             })
             .then(() => session.endDialog());
+    });
+
+// Fallback dialog triggered if the bot can't understand the user input
+bot.dialog('/fuckit',
+    (session, args) => {
+        session.send(`Désolé, je n'ai pas compris la question :-/\n\n
+Je suis un bot qui peut contrôler un feu de circulation, et pis c'est tout.\n
+Voici ce que je suis capable de faire (pour le moment):\n
+- allumer un feu\n
+- éteindre le feu\n
+- dire quel feu est allumé\n`);
+        session.endDialog();
     });

@@ -34,3 +34,9 @@ export function set(state: TrafficLightState): Promise<TrafficLightState> {
                 }
             }));
 }
+
+export function switchOff(): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) =>
+        needle.delete(`${apiBaseUrl}/trafficlight`, null, (error, response) => resolve(!error && response.statusCode == 200)
+        ));
+}
