@@ -13,30 +13,38 @@ export enum TrafficLightState {
 export function get(): Promise<TrafficLightState> {
     return new Promise<TrafficLightState>((resolve, reject) =>
         needle.get(`${apiBaseUrl}/trafficlight`,
-            (error, response) => {
-                if (!error && response.statusCode == 200) {
-                    var body: string = response.body;
-                    var state: TrafficLightState = TrafficLightState[body];
-                    resolve(state);
-                }
-            }));
+            (error, response) =>
+                handleResponse(error, response, resolve, reject,
+                    (res) => {
+                        var body: string = response.body;
+                        return TrafficLightState[body];
+                    })
+        ));
 }
 
-export function set(state: TrafficLightState): Promise<TrafficLightState> {
-    return new Promise<TrafficLightState>((resolve, reject) =>
+export function set(state: TrafficLightState): Promise<void> {
+    return new Promise<void>((resolve, reject) =>
         needle.put(`${apiBaseUrl}/trafficlight/${TrafficLightState[state]}`,
             null,
-            (error, response) => {
-                if (!error && response.statusCode == 200) {
-                    var body: string = response.body;
-                    var state: TrafficLightState = TrafficLightState[body];
-                    resolve(state);
-                }
-            }));
+            (error, response) => handleResponse(error, response, resolve, reject)
+        ));
 }
 
-export function switchOff(): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) =>
-        needle.delete(`${apiBaseUrl}/trafficlight`, null, (error, response) => resolve(!error && response.statusCode == 200)
+export function switchOff(): Promise<void> {
+    return new Promise<void>((resolve, reject) =>
+        needle.delete(`${apiBaseUrl}/trafficlight`,
+            null,
+            (error, response) => handleResponse(error, response, resolve, reject)
         ));
+}
+
+interface Func<T, TResult> { (item: T): TResult }
+
+function handleResponse(error: Error, response: any, resolve: Function, reject: Function, parseResult?: Func<any, TrafficLightState>) {
+    if (!error && response.statusCode == 200) {
+        var result = parseResult != null ? parseResult(response) : undefined;
+        resolve(result);
+    } else {
+        reject();
+    }
 }

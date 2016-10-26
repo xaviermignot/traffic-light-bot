@@ -9,26 +9,26 @@ const apiBaseUrl = process.env.API_URL;
 })(exports.TrafficLightState || (exports.TrafficLightState = {}));
 var TrafficLightState = exports.TrafficLightState;
 function get() {
-    return new Promise((resolve, reject) => needle.get(`${apiBaseUrl}/trafficlight`, (error, response) => {
-        if (!error && response.statusCode == 200) {
-            var body = response.body;
-            var state = TrafficLightState[body];
-            resolve(state);
-        }
-    }));
+    return new Promise((resolve, reject) => needle.get(`${apiBaseUrl}/trafficlight`, (error, response) => handleResponse(error, response, resolve, reject, (res) => {
+        var body = response.body;
+        return TrafficLightState[body];
+    })));
 }
 exports.get = get;
 function set(state) {
-    return new Promise((resolve, reject) => needle.put(`${apiBaseUrl}/trafficlight/${TrafficLightState[state]}`, null, (error, response) => {
-        if (!error && response.statusCode == 200) {
-            var body = response.body;
-            var state = TrafficLightState[body];
-            resolve(state);
-        }
-    }));
+    return new Promise((resolve, reject) => needle.put(`${apiBaseUrl}/trafficlight/${TrafficLightState[state]}`, null, (error, response) => handleResponse(error, response, resolve, reject)));
 }
 exports.set = set;
 function switchOff() {
-    return new Promise((resolve, reject) => needle.delete(`${apiBaseUrl}/trafficlight`, null, (error, response) => resolve(!error && response.statusCode == 200)));
+    return new Promise((resolve, reject) => needle.delete(`${apiBaseUrl}/trafficlight`, null, (error, response) => handleResponse(error, response, resolve, reject)));
 }
 exports.switchOff = switchOff;
+function handleResponse(error, response, resolve, reject, parseResult) {
+    if (!error && response.statusCode == 200) {
+        var result = parseResult != null ? parseResult(response) : undefined;
+        resolve(result);
+    }
+    else {
+        reject();
+    }
+}

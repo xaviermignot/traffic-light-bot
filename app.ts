@@ -3,11 +3,11 @@ import restify = require('restify');
 import builder = require('botbuilder');
 import dotenv = require('dotenv');
 
-import * as api from "./trafficLightApi";
-import * as msgHelper from "./messageHelper";
-
 // Use the .env file for managing environment variable for local development
 dotenv.config();
+
+import * as api from "./trafficLightApi";
+import * as msgHelper from "./messageHelper";
 
 //=========================================================
 // Bot Setup
@@ -42,7 +42,8 @@ bot.dialog('/', intents);
 intents.matches('SwitchOnBulb', '/switchOn')
     .matches('SwitchOffBulb', '/switchOff')
     .matches('GetLightsState', '/getState')
-    .onDefault('/fuckit');
+    .matches('SayHi', '/sayHi')
+    .onDefault('/fallback');
 
 // Dialog used for switching a light on
 bot.dialog('/switchOn', [
@@ -62,12 +63,9 @@ bot.dialog('/switchOn', [
         if (color) {
             session.send(`Okay, j'allume le feu ${color}`);
             session.sendTyping();
-            api.set(msgHelper.getStateFromIntentColor(color)).then((state) => {
-                session.send(`C'est bon, le feu ${color} est allumé`);
-            })
-                .catch(() => {
-                    session.send(`Damned, je n'ai pas réussi à allumer le feu`);
-                })
+            api.set(msgHelper.getStateFromIntentColor(color))
+                .then(() => session.send(`C'est bon, le feu ${color} est allumé`))
+                .catch(() => session.send(`Damned, je n'ai pas réussi à allumer le feu ${color}`))
                 .then(() => session.endDialog());
         }
     }
@@ -78,31 +76,31 @@ bot.dialog('/switchOff',
     (session, args) => {
         session.send('Okay, j\'éteins le feu');
         session.sendTyping();
-        api.switchOff().then((result) => {
-            if (result) {
-                session.send('C\'est fait');
-            }
-            else {
-                session.send('Oups je trouve pas le bouton :-/');
-            }
-        })
+        api.switchOff()
+            .then(() => session.send(['C\'est fait', 'Et voilà', 'A votre service !']))
+            .catch(() => session.send('Oups je trouve pas le bouton :-/'))
             .then(() => session.endDialog());
     });
 
 // Dialog used to tell the user which light is on (if there is one)
 bot.dialog('/getState',
     (session, args) => {
-        api.get().then((state) => {
-            session.send(msgHelper.getMessageFromState(state));
-        })
-            .catch(() => {
-                session.send('Mince, je n\'arrive pas à joindre le feu :\'(');
-            })
+        api.get()
+            .then((state) => session.send(msgHelper.getMessageFromState(state)))
+            .catch(() => session.send('Mince, je n\'arrive pas à joindre le feu :\'('))
             .then(() => session.endDialog());
     });
 
+bot.dialog('/sayHi',
+    (session) => {
+        session.sendTyping();
+        session.send(['Bonjour !', 'Hello !', 'Salutations !']);
+        session.send(['Qu\'est ce que je peux faire pour vous ajourd\'hui ?', 'Je peux vous aider ?', 'Que puis-je faire pour vous ?'])
+        session.endDialog();
+    });
+
 // Fallback dialog triggered if the bot can't understand the user input
-bot.dialog('/fuckit',
+bot.dialog('/fallback',
     (session, args) => {
         session.send(`Désolé, je n'ai pas compris la question :-/\n\n
 Je suis un bot qui peut contrôler un feu de circulation, et pis c'est tout.\n
