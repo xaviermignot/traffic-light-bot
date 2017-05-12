@@ -7,7 +7,8 @@ export enum TrafficLightState {
     Off,
     Green,
     Orange,
-    Red
+    Red,
+    Broken
 }
 
 export function get(): Promise<TrafficLightState> {
