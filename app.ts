@@ -2,6 +2,7 @@ import { IIntentDialogOptions, IPromptOptions } from 'botbuilder/lib/botbuilder'
 import restify = require('restify');
 import builder = require('botbuilder');
 import dotenv = require('dotenv');
+import azure = require('azure-storage');
 
 // Use the .env file for managing environment variable for local development
 dotenv.config();
@@ -36,6 +37,8 @@ server.post('/api/messages', connector.listen());
 var recognizer = new builder.LuisRecognizer(process.env.LUIS_URL);
 var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 
+var savedAddress;
+
 bot.dialog('/', intents);
 
 // Makes the connexion between the LUIS intents and the bot dialogs
@@ -48,6 +51,7 @@ intents.matches('SwitchOnBulb', '/switchOn')
 // Dialog used for switching a light on
 bot.dialog('/switchOn', [
     (session, args, next) => {
+        savedAddress = session.message.address;
         var colorEntity = builder.EntityRecognizer.findEntity(args.entities, 'color');
 
         if (!colorEntity) {
@@ -109,4 +113,25 @@ Voici ce que je suis capable de faire (pour le moment):\n
 - éteindre le feu\n
 - dire quel feu est allumé\n`);
         session.endDialog();
+    });
+
+bot.on('trigger',
+    (message) => {
+        var queuedMessage = message.value;
+        var reply = new builder.Message()
+            .address(savedAddress)
+            .text('This is coming from the trigger: ' + queuedMessage.text);
+        bot.send(reply);
+    });
+
+var queueSvc = azure.createQueueService(process.env.STORAGE_CNX);
+queueSvc.getMessages('proactive-messages',
+    (error, message) => {
+        if (error) {
+            return;
+        }
+        var botMsg = new builder.Message()
+            .address(savedAddress)
+            .text('Nom de zeus !!!');
+        bot.send(botMsg);
     });
