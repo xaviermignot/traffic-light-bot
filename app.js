@@ -27,6 +27,7 @@ server.post('/api/messages', connector.listen());
 // Create bot and add dialogs
 var recognizer = new builder.LuisRecognizer(process.env.LUIS_URL);
 var intents = new builder.IntentDialog({ recognizers: [recognizer] });
+var savedAddress;
 bot.dialog('/', intents);
 // Makes the connexion between the LUIS intents and the bot dialogs
 intents.matches('SwitchOnBulb', '/switchOn')
@@ -37,6 +38,7 @@ intents.matches('SwitchOnBulb', '/switchOn')
 // Dialog used for switching a light on
 bot.dialog('/switchOn', [
         (session, args, next) => {
+        savedAddress = session.message.address;
         var colorEntity = builder.EntityRecognizer.findEntity(args.entities, 'color');
         if (!colorEntity) {
             builder.Prompts.choice(session, 'Quel feu je dois allumer ?', ['rouge', 'orange', 'vert'], { retryPrompt: 'Pardon, vous avez dit quel feu ?' });
@@ -88,4 +90,14 @@ Voici ce que je suis capable de faire (pour le moment):\n
 - éteindre le feu\n
 - dire quel feu est allumé\n`);
     session.endDialog();
+});
+bot.on('trigger', (message) => {
+    if (!savedAddress) {
+        return;
+    }
+    var queuedMessage = message.value;
+    var reply = new builder.Message()
+        .address(savedAddress)
+        .text('This is coming from the trigger: ' + queuedMessage.text);
+    bot.send(reply);
 });

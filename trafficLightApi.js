@@ -6,6 +6,7 @@ const apiBaseUrl = process.env.API_URL;
     TrafficLightState[TrafficLightState["Green"] = 1] = "Green";
     TrafficLightState[TrafficLightState["Orange"] = 2] = "Orange";
     TrafficLightState[TrafficLightState["Red"] = 3] = "Red";
+    TrafficLightState[TrafficLightState["Broken"] = 4] = "Broken";
 })(exports.TrafficLightState || (exports.TrafficLightState = {}));
 var TrafficLightState = exports.TrafficLightState;
 function get() {

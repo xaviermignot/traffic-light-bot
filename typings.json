@@ -1,11 +1,12 @@
 {
   "name": "trafficlight-bot",
-  "dependencies": {},
   "globalDependencies": {
-    "bunyan": "registry:dt/bunyan#0.0.0+20160412155112",
-    "dotenv": "registry:dt/dotenv#2.0.0+20160327131627",
-    "needle": "registry:dt/needle#0.7.8+20160317120654",
-    "node": "registry:dt/node#6.0.0+20161006230116",
-    "restify": "registry:dt/restify#2.0.0+20160928142801"
+    "needle": "registry:dt/needle#1.4.0+20170130190048",
+    "node": "registry:dt/node#7.0.0+20170322231424"
+  },
+  "dependencies": {
+    "bunyan": "registry:dt/bunyan#0.0.0+20170311003516",
+    "dotenv": "registry:dt/dotenv#2.0.0+20170113195346",
+    "restify": "registry:dt/restify#2.0.0+20170317170827"
   }
 }
