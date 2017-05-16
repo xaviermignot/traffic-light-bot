@@ -2,7 +2,6 @@
 const restify = require('restify');
 const builder = require('botbuilder');
 const dotenv = require('dotenv');
-const azure = require('azure-storage');
 // Use the .env file for managing environment variable for local development
 dotenv.config();
 const api = require("./trafficLightApi");
@@ -93,20 +92,12 @@ Voici ce que je suis capable de faire (pour le moment):\n
     session.endDialog();
 });
 bot.on('trigger', (message) => {
+    if (!savedAddress) {
+        return;
+    }
     var queuedMessage = message.value;
     var reply = new builder.Message()
         .address(savedAddress)
         .text('This is coming from the trigger: ' + queuedMessage.text);
     bot.send(reply);
 });
-var queueSvc = azure.createQueueService(process.env.STORAGE_CNX);
-queueSvc.getMessages('proactive-messages', (error, message) => {
-    if (error) {
-        return;
-    }
-    var botMsg = new builder.Message()
-        .address(savedAddress)
-        .text('Nom de zeus !!!');
-    bot.send(botMsg);
-});
-// queueSvc.addListener()

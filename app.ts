@@ -2,7 +2,6 @@ import { IIntentDialogOptions, IPromptOptions } from 'botbuilder/lib/botbuilder'
 import restify = require('restify');
 import builder = require('botbuilder');
 import dotenv = require('dotenv');
-import azure = require('azure-storage');
 
 // Use the .env file for managing environment variable for local development
 dotenv.config();
@@ -117,21 +116,12 @@ Voici ce que je suis capable de faire (pour le moment):\n
 
 bot.on('trigger',
     (message) => {
+        if (!savedAddress) {
+            return;
+        }
         var queuedMessage = message.value;
         var reply = new builder.Message()
             .address(savedAddress)
             .text('This is coming from the trigger: ' + queuedMessage.text);
         bot.send(reply);
-    });
-
-var queueSvc = azure.createQueueService(process.env.STORAGE_CNX);
-queueSvc.getMessages('proactive-messages',
-    (error, message) => {
-        if (error) {
-            return;
-        }
-        var botMsg = new builder.Message()
-            .address(savedAddress)
-            .text('Nom de zeus !!!');
-        bot.send(botMsg);
     });

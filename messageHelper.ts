@@ -10,6 +10,8 @@ export function getMessageFromState(state: api.TrafficLightState): string {
             return 'Le feu est orange';
         case api.TrafficLightState.Red:
             return 'Le feu est rouge';
+        case api.TrafficLightState.Broken:
+            return 'Le feu est cassé :\'(';
     }
 }
 

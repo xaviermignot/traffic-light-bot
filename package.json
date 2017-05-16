@@ -13,7 +13,6 @@
   "author": "Xavier Mignot",
   "license": "ISC",
   "dependencies": {
-    "azure-storage": "^2.1.0",
     "botbuilder": "^3.8.1",
     "dotenv": "^4.0.0",
     "needle": "^1.6.0",
