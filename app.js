@@ -21,13 +21,13 @@ var connector = new builder.ChatConnector({
 });
 var bot = new builder.UniversalBot(connector);
 server.post('/api/messages', connector.listen());
+var savedAddress; // Address for proactive messages
 //=========================================================
 // Bots Dialogs
 //=========================================================
-// Create bot and add dialogs
+// Link with LUIS
 var recognizer = new builder.LuisRecognizer(process.env.LUIS_URL);
 var intents = new builder.IntentDialog({ recognizers: [recognizer] });
-var savedAddress;
 bot.dialog('/', intents);
 // Makes the connexion between the LUIS intents and the bot dialogs
 intents.matches('SwitchOnBulb', '/switchOn')
@@ -61,6 +61,7 @@ bot.dialog('/switchOn', [
 ]);
 // Dialog used to switch the lights off
 bot.dialog('/switchOff', (session, args) => {
+    savedAddress = session.message.address;
     session.send('Okay, j\'éteins le feu');
     session.sendTyping();
     api.switchOff()
@@ -70,12 +71,14 @@ bot.dialog('/switchOff', (session, args) => {
 });
 // Dialog used to tell the user which light is on (if there is one)
 bot.dialog('/getState', (session, args) => {
+    savedAddress = session.message.address;
     api.get()
         .then((state) => session.send(msgHelper.getMessageFromState(state)))
         .catch(() => session.send('Mince, je n\'arrive pas à joindre le feu :\'('))
         .then(() => session.endDialog());
 });
 bot.dialog('/sayHi', (session) => {
+    savedAddress = session.message.address;
     session.sendTyping();
     session.send(['Bonjour !', 'Hello !', 'Salutations !']);
     session.send(['Qu\'est ce que je peux faire pour vous ajourd\'hui ?', 'Je peux vous aider ?', 'Que puis-je faire pour vous ?']);
@@ -83,6 +86,7 @@ bot.dialog('/sayHi', (session) => {
 });
 // Fallback dialog triggered if the bot can't understand the user input
 bot.dialog('/fallback', (session, args) => {
+    // savedAddress = session.message.address;   
     session.send(`Désolé, je n'ai pas compris la question :-/\n\n
 Je suis un bot qui peut contrôler un feu de circulation, et pis c'est tout.\n
 Voici ce que je suis capable de faire (pour le moment):\n
@@ -91,13 +95,23 @@ Voici ce que je suis capable de faire (pour le moment):\n
 - dire quel feu est allumé\n`);
     session.endDialog();
 });
-bot.on('trigger', (message) => {
+server.use(restify.bodyParser());
+server.post('api/messages/proactive', (req, res, next) => {
     if (!savedAddress) {
+        res.send(409, 'The conversation has not started yet');
+        next();
         return;
     }
-    var queuedMessage = message.value;
-    var reply = new builder.Message()
+    if (!req.body || !req.body.text) {
+        res.send(400, 'Request need to contain a JSON body with a text property');
+        next();
+        return;
+    }
+    // var msg = req.body.text;
+    var msg = new builder.Message()
         .address(savedAddress)
-        .text('This is coming from the trigger: ' + queuedMessage.text);
-    bot.send(reply);
+        .text(req.body.text);
+    bot.send(msg);
+    res.send(200, 'The message has been sent to the conversation');
+    next();
 });
