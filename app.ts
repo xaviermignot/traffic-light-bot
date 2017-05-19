@@ -50,8 +50,18 @@ intents.matches('SwitchOnBulb', '/switchOn')
 
 // Dialog used for switching a light on
 bot.dialog('/switchOn', [
+    async (session, args, next) => {
+        var currentState = await api.get();
+        if (currentState == api.TrafficLightState.Broken) {
+            session.send('Je ne peux pas, le feu est cassé...');
+            session.endDialog();
+        }
+        else {
+            next(args);
+        }
+    },
     (session, args, next) => {
-        savedAddress = session.message.address;   
+        savedAddress = session.message.address;
         var colorEntity = builder.EntityRecognizer.findEntity(args.entities, 'color');
 
         if (!colorEntity) {
@@ -78,7 +88,7 @@ bot.dialog('/switchOn', [
 // Dialog used to switch the lights off
 bot.dialog('/switchOff',
     (session, args) => {
-        savedAddress = session.message.address;   
+        savedAddress = session.message.address;
         session.send('Okay, j\'éteins le feu');
         session.sendTyping();
         api.switchOff()
@@ -90,7 +100,7 @@ bot.dialog('/switchOff',
 // Dialog used to tell the user which light is on (if there is one)
 bot.dialog('/getState',
     (session, args) => {
-        savedAddress = session.message.address;   
+        savedAddress = session.message.address;
         api.get()
             .then((state) => session.send(msgHelper.getMessageFromState(state)))
             .catch(() => session.send('Mince, je n\'arrive pas à joindre le feu :\'('))
@@ -99,7 +109,7 @@ bot.dialog('/getState',
 
 bot.dialog('/sayHi',
     (session) => {
-        savedAddress = session.message.address;   
+        savedAddress = session.message.address;
         session.sendTyping();
         session.send(['Bonjour !', 'Hello !', 'Salutations !']);
         session.send(['Qu\'est ce que je peux faire pour vous ajourd\'hui ?', 'Je peux vous aider ?', 'Que puis-je faire pour vous ?'])

@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const api = require("./trafficLightApi");
 function getMessageFromState(state) {
     switch (state) {

@@ -1,14 +1,15 @@
 "use strict";
-const needle = require('needle');
+Object.defineProperty(exports, "__esModule", { value: true });
+const needle = require("needle");
 const apiBaseUrl = process.env.API_URL;
+var TrafficLightState;
 (function (TrafficLightState) {
     TrafficLightState[TrafficLightState["Off"] = 0] = "Off";
     TrafficLightState[TrafficLightState["Green"] = 1] = "Green";
     TrafficLightState[TrafficLightState["Orange"] = 2] = "Orange";
     TrafficLightState[TrafficLightState["Red"] = 3] = "Red";
     TrafficLightState[TrafficLightState["Broken"] = 4] = "Broken";
-})(exports.TrafficLightState || (exports.TrafficLightState = {}));
-var TrafficLightState = exports.TrafficLightState;
+})(TrafficLightState = exports.TrafficLightState || (exports.TrafficLightState = {}));
 function get() {
     return new Promise((resolve, reject) => needle.get(`${apiBaseUrl}/trafficlight`, (error, response) => handleResponse(error, response, resolve, reject, (res) => {
         var body = response.body;
