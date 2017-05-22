@@ -49,6 +49,16 @@ intents.matches('SwitchOnBulb', '/switchOn')
 
 // Dialog used for switching a light on
 bot.dialog('/switchOn', [
+    async (session, args, next) => {
+        var currentState = await api.get();
+        if (currentState == api.TrafficLightState.Broken) {
+            session.send('Je ne peux pas, le feu est cassé...');
+            session.endDialog();
+        }
+        else {
+            next(args);
+        }
+    },
     (session, args, next) => {
         savedAddress = session.message.address;
         var colorEntity = builder.EntityRecognizer.findEntity(args.entities, 'color');

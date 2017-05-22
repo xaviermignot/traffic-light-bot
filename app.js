@@ -1,7 +1,16 @@
 "use strict";
-const restify = require('restify');
-const builder = require('botbuilder');
-const dotenv = require('dotenv');
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const restify = require("restify");
+const builder = require("botbuilder");
+const dotenv = require("dotenv");
 // Use the .env file for managing environment variable for local development
 dotenv.config();
 const api = require('./trafficLightApi');
@@ -37,7 +46,17 @@ intents.matches('SwitchOnBulb', '/switchOn')
     .onDefault('/fallback');
 // Dialog used for switching a light on
 bot.dialog('/switchOn', [
-        (session, args, next) => {
+    (session, args, next) => __awaiter(this, void 0, void 0, function* () {
+        var currentState = yield api.get();
+        if (currentState == api.TrafficLightState.Broken) {
+            session.send('Je ne peux pas, le feu est cassé...');
+            session.endDialog();
+        }
+        else {
+            next(args);
+        }
+    }),
+    (session, args, next) => {
         savedAddress = session.message.address;
         var colorEntity = builder.EntityRecognizer.findEntity(args.entities, 'color');
         if (!colorEntity) {
@@ -47,7 +66,7 @@ bot.dialog('/switchOn', [
             next({ response: colorEntity, resumed: null });
         }
     },
-        (session, result) => {
+    (session, result) => {
         var color = result.response.entity;
         if (color) {
             session.send(`Okay, j'allume le feu ${color}`);
