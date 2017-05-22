@@ -1,5 +1,4 @@
-import { IAddress } from 'botbuilder/lib';
-import { IIntentDialogOptions, IPromptOptions } from 'botbuilder/lib/botbuilder';
+import { IIntentDialogOptions, IPromptOptions, IAddress } from 'botbuilder/lib/botbuilder';
 import restify = require('restify');
 import builder = require('botbuilder');
 import dotenv = require('dotenv');
@@ -7,8 +6,8 @@ import dotenv = require('dotenv');
 // Use the .env file for managing environment variable for local development
 dotenv.config();
 
-import * as api from "./trafficLightApi";
-import * as msgHelper from "./messageHelper";
+import * as api from './trafficLightApi';
+import * as msgHelper from './messageHelper';
 
 //=========================================================
 // Bot Setup
@@ -51,7 +50,7 @@ intents.matches('SwitchOnBulb', '/switchOn')
 // Dialog used for switching a light on
 bot.dialog('/switchOn', [
     (session, args, next) => {
-        savedAddress = session.message.address;   
+        savedAddress = session.message.address;
         var colorEntity = builder.EntityRecognizer.findEntity(args.entities, 'color');
 
         if (!colorEntity) {
@@ -78,7 +77,7 @@ bot.dialog('/switchOn', [
 // Dialog used to switch the lights off
 bot.dialog('/switchOff',
     (session, args) => {
-        savedAddress = session.message.address;   
+        savedAddress = session.message.address;
         session.send('Okay, j\'éteins le feu');
         session.sendTyping();
         api.switchOff()
@@ -90,7 +89,7 @@ bot.dialog('/switchOff',
 // Dialog used to tell the user which light is on (if there is one)
 bot.dialog('/getState',
     (session, args) => {
-        savedAddress = session.message.address;   
+        savedAddress = session.message.address;
         api.get()
             .then((state) => session.send(msgHelper.getMessageFromState(state)))
             .catch(() => session.send('Mince, je n\'arrive pas à joindre le feu :\'('))
@@ -99,7 +98,7 @@ bot.dialog('/getState',
 
 bot.dialog('/sayHi',
     (session) => {
-        savedAddress = session.message.address;   
+        savedAddress = session.message.address;
         session.sendTyping();
         session.send(['Bonjour !', 'Hello !', 'Salutations !']);
         session.send(['Qu\'est ce que je peux faire pour vous ajourd\'hui ?', 'Je peux vous aider ?', 'Que puis-je faire pour vous ?'])
@@ -133,10 +132,13 @@ server.post('api/messages/proactive', (req, res, next) => {
         return;
     }
 
-    // var msg = req.body.text;
     var msg = new builder.Message()
         .address(savedAddress)
-        .text(req.body.text);
+        .text(req.body.text)
+        .addAttachment({
+            contentType: "image/gif",
+            contentUrl: req.body.gifUrl
+        });
     bot.send(msg);
     res.send(200, 'The message has been sent to the conversation');
     next();

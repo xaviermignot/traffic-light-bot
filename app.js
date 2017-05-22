@@ -4,8 +4,8 @@ const builder = require('botbuilder');
 const dotenv = require('dotenv');
 // Use the .env file for managing environment variable for local development
 dotenv.config();
-const api = require("./trafficLightApi");
-const msgHelper = require("./messageHelper");
+const api = require('./trafficLightApi');
+const msgHelper = require('./messageHelper');
 //=========================================================
 // Bot Setup
 //=========================================================
@@ -107,10 +107,13 @@ server.post('api/messages/proactive', (req, res, next) => {
         next();
         return;
     }
-    // var msg = req.body.text;
     var msg = new builder.Message()
         .address(savedAddress)
-        .text(req.body.text);
+        .text(req.body.text)
+        .addAttachment({
+        contentType: "image/gif",
+        contentUrl: req.body.gifUrl
+    });
     bot.send(msg);
     res.send(200, 'The message has been sent to the conversation');
     next();
