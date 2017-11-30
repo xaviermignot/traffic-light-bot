@@ -13,8 +13,8 @@ const builder = require("botbuilder");
 const dotenv = require("dotenv");
 // Use the .env file for managing environment variable for local development
 dotenv.config();
-const api = require('./trafficLightApi');
-const msgHelper = require('./messageHelper');
+const api = require("./trafficLightApi");
+const msgHelper = require("./messageHelper");
 //=========================================================
 // Bot Setup
 //=========================================================
