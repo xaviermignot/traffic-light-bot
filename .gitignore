@@ -46,3 +46,6 @@ typings
 .DS_Store
 
 .env
+
+# Generated js files
+*.js
