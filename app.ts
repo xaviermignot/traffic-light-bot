@@ -1,4 +1,4 @@
-import { IIntentDialogOptions, IPromptOptions, IAddress } from 'botbuilder/lib/botbuilder';
+import { IAddress } from 'botbuilder/lib/botbuilder';
 import restify = require('restify');
 import builder = require('botbuilder');
 import dotenv = require('dotenv');
