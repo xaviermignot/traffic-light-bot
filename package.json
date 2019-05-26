@@ -13,13 +13,17 @@
   "author": "Xavier Mignot",
   "license": "ISC",
   "dependencies": {
-    "botbuilder": "^3.12.0",
+    "botbuilder": "^4.4.0",
+    "botbuilder-ai": "^4.4.0",
     "dotenv": "^8.0.0",
     "needle": "^2.4.0",
     "restify": "^8.3.2",
     "typescript": "^3.4.5"
   },
   "devDependencies": {
-    "@types/node": "^12.0.2"
+    "@types/dotenv": "^6.1.1",
+    "@types/needle": "^2.0.4",
+    "@types/node": "^12.0.2",
+    "@types/restify": "^7.2.10"
   }
 }

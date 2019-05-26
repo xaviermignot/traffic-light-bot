@@ -1,4 +1,5 @@
-import { IAddress } from 'botbuilder/lib/botbuilder';
+import { IAddress } from 'botbuilder/lib/botFrameworkAdapter';
+import { LuisRecognizer } from 'botbuilder-ai'
 import restify = require('restify');
 import builder = require('botbuilder');
 import dotenv = require('dotenv');
@@ -20,13 +21,19 @@ server.listen(process.env.port || process.env.PORT || 3978, function () {
 });
 
 // Create chat bot
-var connector = new builder.ChatConnector({
+var adapter = new builder.BotFrameworkAdapter({
     appId: process.env.MICROSOFT_APP_ID,
     appPassword: process.env.MICROSOFT_APP_PASSWORD
 });
 
-var bot = new builder.UniversalBot(connector);
-server.post('/api/messages', connector.listen());
+var bot = new builder.UniversalBot(adapter);
+server.post('/api/messages', (req, res) => {
+    // Route received a request to adapter for processing
+    adapter.processActivity(req, res, async (turnContext) => {
+        // route to bot activity handler.
+        await bot.run(turnContext);
+    });
+});
 
 var savedAddress: IAddress; // Address for proactive messages
 
@@ -35,7 +42,7 @@ var savedAddress: IAddress; // Address for proactive messages
 //=========================================================
 
 // Link with LUIS
-var recognizer = new builder.LuisRecognizer(process.env.LUIS_URL);
+var recognizer = new LuisRecognizer(process.env.LUIS_URL);
 var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 
 bot.dialog('/', intents);
@@ -86,7 +93,7 @@ bot.dialog('/switchOn', [
 
 // Dialog used to switch the lights off
 bot.dialog('/switchOff',
-    (session, args) => {
+    (session) => {
         savedAddress = session.message.address;
         session.send('Okay, j\'éteins le feu');
         session.sendTyping();
@@ -98,7 +105,7 @@ bot.dialog('/switchOff',
 
 // Dialog used to tell the user which light is on (if there is one)
 bot.dialog('/getState',
-    (session, args) => {
+    (session) => {
         savedAddress = session.message.address;
         api.get()
             .then((state) => session.send(msgHelper.getMessageFromState(state)))
@@ -117,7 +124,7 @@ bot.dialog('/sayHi',
 
 // Fallback dialog triggered if the bot can't understand the user input
 bot.dialog('/fallback',
-    (session, args) => {
+    (session) => {
         // savedAddress = session.message.address;   
         session.send(`Désolé, je n'ai pas compris la question :-/\n\n
 Je suis un bot qui peut contrôler un feu de circulation, et pis c'est tout.\n
@@ -128,7 +135,7 @@ Voici ce que je suis capable de faire (pour le moment):\n
         session.endDialog();
     });
 
-server.use(restify.bodyParser());
+server.use(restify.plugins.bodyParser());
 server.post('api/messages/proactive', (req, res, next) => {
     if (!savedAddress) {
         res.send(409, 'The conversation has not started yet');
