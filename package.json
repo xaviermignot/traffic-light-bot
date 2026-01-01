@@ -13,7 +13,7 @@
   "author": "Xavier Mignot",
   "license": "ISC",
   "dependencies": {
-    "botbuilder": "^4.21.4",
+    "botbuilder": "^4.23.3",
     "dotenv": "^8.0.0",
     "needle": "^2.4.0",
     "restify": "^11.1.0",
